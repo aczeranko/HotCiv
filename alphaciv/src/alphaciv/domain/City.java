@@ -1,3 +1,4 @@
+package alphaciv.domain;
 /** Represents a city in the game.
 
     Responsibilities:

@@ -1,0 +1,74 @@
+<!-- Build file for the alphaciv project
+-->
+<project name="alphaciv" default="help" basedir=".">
+    
+  <property name="source-directory" value="src"/>
+  <property name="test-source-directory" value="test"/>
+  <property name="build-directory" value="build"/>
+  <property name="javadoc-directory" value="javadoc"/>
+
+  <property name="junit-jar" value="lib/junit-4.4.jar"/>
+
+  <path id="class-path">
+    <pathelement location="${build-directory}"/>
+    <pathelement location="${junit-jar}"/>
+  </path>
+
+  <target name="help">
+    <echo>
+AlphaCiv build management.
+  Targets:
+    build-src: Builds production code.
+    test:      JUnit test production code.
+    clean:     Removes all bytecode.
+    javadoc:   Generate JavaDoc.
+    </echo>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build-directory}"/>
+    <delete dir="${javadoc-directory}"/>
+  </target>
+
+  <target name="prepare">
+    <mkdir dir="${build-directory}"/>
+    <mkdir dir="${javadoc-directory}"/>
+  </target>
+
+  <target name="build-src" depends="prepare">
+    <javac srcdir="${source-directory}"
+	  destdir="${build-directory}"
+	  includeantruntime="no">
+      <classpath refid="class-path"/>
+    </javac>
+  </target>
+
+  <target name="build-test" depends="build-src">
+    <javac srcdir="${test-source-directory}"
+      destdir="${build-directory}"
+	  includeantruntime="no">
+      <classpath refid="class-path"/>
+    </javac>
+  </target>
+
+  <target name="build-all" depends="build-src,build-test"/>
+  
+  <target name="test"  depends="build-all">
+    <java classname="org.junit.runner.JUnitCore">
+      <arg value="alphaciv.domain.TestAlphaCiv"/>
+      <classpath refid="class-path"/>
+    </java>
+  </target>
+
+  <target name="javadoc" depends="prepare">
+    <javadoc
+      packagenames="alphaciv.*"
+      destdir="${javadoc-directory}"
+      sourcepath="${source-directory}"
+      windowtitle="alphaciv">
+      
+      <classpath refid="class-path"/>
+    </javadoc>
+  </target>
+  
+</project>

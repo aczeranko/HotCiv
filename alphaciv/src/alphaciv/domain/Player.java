@@ -1,3 +1,4 @@
+package alphaciv.domain;
 /** Represents a player of the game.
 
     Responsibilities:
