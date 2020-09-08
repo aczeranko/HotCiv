@@ -86,17 +86,31 @@ public class GameImpl implements Game {
 	
 	public int getAge() { return currentAge; }
 
-	public boolean moveUnit( Position from, Position to ) {
-	
-		Unit movingUnit = units.get(from);
-	    if (movingUnit.getOwner() == currentPlayer && getTileAt(to).getTypeString() != GameConstants.MOUNTAINS) {  	
-	    	units.put(to, movingUnit);
+	public boolean moveUnit( Position from, Position to ) {		
+	    if (isValidMove(from, to)) {  	
+	    	units.put(to, units.get(from));
 	    	units.remove(from);
 	    	return true;
 	    }
 	    else {
 	    	return false; 
 	    }
+	}
+	
+	/**
+	 * returns true if the piece being moved is player's piece
+	 * 			and if the tile being moved to is not a mountain
+	 * 			and	if the 'to' destination is null (empty space)
+	 * 				or if the 'to' destination holds a different player's unit
+	 * @param from
+	 * @param to
+	 */
+	private boolean isValidMove( Position from, Position to ) {
+		Unit movingUnit = units.get(from);
+		Unit unitInToPos = units.get(to);
+		return movingUnit.getOwner() == currentPlayer 
+				&& getTileAt(to).getTypeString() != GameConstants.MOUNTAINS
+				&& (unitInToPos == null || unitInToPos.getOwner() != currentPlayer);	
 	}
 
 	public void endOfTurn() {
@@ -107,6 +121,11 @@ public class GameImpl implements Game {
 			currentPlayer = Player.RED; 
 		}
 	}
+	
+	private void endOfRound() {
+		
+	}
+	
 	public void changeWorkForceFocusInCityAt( Position p, String balance ) {}
 	public void changeProductionInCityAt( Position p, String unitType ) {}
 	public void performUnitActionAt( Position p ) {}

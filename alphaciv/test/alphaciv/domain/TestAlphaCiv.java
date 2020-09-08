@@ -45,7 +45,7 @@ public class TestAlphaCiv {
 	@Test 
 	public void unitsCannotMoveOverMountain() {
 		game.endOfTurn(); // sets it to Blue's turn
-		assertEquals("Should be Blue's Turn", game.getPlayerInTurn(),Player.BLUE);
+		assertEquals("Should be Blue's Turn",Player.BLUE, game.getPlayerInTurn());
 		assertFalse("Units cannot move over mountains", game.moveUnit(new Position (3,2), new Position(2,2)));
 	}
 
@@ -55,8 +55,16 @@ public class TestAlphaCiv {
 	}
 
 	@Test
-	public void citiesProduce6ProductionAfterEndOfRound() {
-
+	public void citiesProduce6ProductionAfterEndOfRoundOne() {
+		assertEquals("City should have 6 production after round 1", 6, 6);
+		
+	
+		
+	}
+	
+	@Test
+	public void citiesProduceAnother6AfterEndOfRoundTwo() {
+		
 	}
 
 
@@ -97,7 +105,7 @@ public class TestAlphaCiv {
 		game.endOfTurn();
 		// 3300BC
 		game.endOfTurn(); 
-		game.endOfTurn();
+		game.endOfTurn(); 
 		// 3200BC
 		game.endOfTurn(); 
 		game.endOfTurn();
@@ -111,7 +119,23 @@ public class TestAlphaCiv {
 
 	@Test
 	public void redAttackBlueDestroyed() {
-
+		assertTrue("Red Settler at (4,3) destroys Blue Legion at (3, 2)", game.moveUnit(new Position(4, 3), new Position(3,2)));
+		
+		Unit u = game.getUnitAt(new Position(4, 3));
+		assertNull("Red Settler should no longer be at (4,3)", u);
+		assertEquals("Settler should be at (3,2)", GameConstants.SETTLER, game.getUnitAt(new Position(3,2)).getTypeString());
+		assertEquals("Settler at (3,2) should be red",  Player.RED, game.getUnitAt(new Position (3,2)).getOwner()); 
+	}
+	
+	@Test
+	public void redCannotAttackRed() {
+		game.moveUnit(new Position(2,0), new Position(3,1));
+		game.endOfTurn();
+		game.endOfTurn();
+		game.moveUnit(new Position(3,1), new Position(4,2)); 
+		game.endOfTurn();
+		game.endOfTurn();
+		assertFalse("Player cannot attack itself", game.moveUnit(new Position(4,2), new Position(4,3)));
 	}
 
 }

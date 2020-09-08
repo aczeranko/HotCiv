@@ -5,6 +5,7 @@ public class CityImpl implements City {
 	private Player owner;
 	private int population;
 	private int productionPerRound;
+	private int totalProduction;
 	private String production; 
 	private String workforceFocus; 
 	
@@ -12,6 +13,8 @@ public class CityImpl implements City {
 		this.owner = owner; 
 		this.population = 1; 
 		this.productionPerRound = 6;
+		this.totalProduction = 0;
+		this.workforceFocus = GameConstants.productionFocus;
 	}
 	
 	@Override
@@ -32,6 +35,14 @@ public class CityImpl implements City {
 	@Override
 	public String getWorkforceFocus() {
 		return workforceFocus;
+	}
+	
+	public int getTotalProduction() {
+		return totalProduction; 
+	}
+	
+	public void produce() {
+		totalProduction += productionPerRound;
 	}
 
 }
