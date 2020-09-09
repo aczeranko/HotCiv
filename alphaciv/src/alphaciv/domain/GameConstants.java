@@ -23,8 +23,11 @@ public class GameConstants {
   public static final int WORLDSIZE = 16;
   // Valid unit types
   public static final String ARCHER    = "archer";
+  public static final int ARCHER_COST = 10;
   public static final String LEGION    = "legion";
+  public static final int LEGION_COST = 15;
   public static final String SETTLER   = "settler";
+  public static final int SETTLER_COST = 30;
   // Valid terrain types
   public static final String PLAINS    = "plains";
   public static final String OCEANS    = "ocean";

@@ -5,24 +5,32 @@ public class UnitImpl implements Unit {
 	private String unitType; 
 	private Player owner; 
 	private int moveCount; 
+	private boolean hasBeenMoved;
 	private int defensiveStrength; 
 	private int attackingStrength; 
 	
 	public UnitImpl(String unitType, Player owner) {
 		this.unitType = unitType; 
 		this.owner = owner; 
-		this.moveCount = 0; 
-		this.defensiveStrength = 0; 
-		this.attackingStrength = 0; 
+		this.moveCount = 1; 
+		this.hasBeenMoved = false; 
+		
+		switch (unitType) {
+		case GameConstants.ARCHER:
+			this.defensiveStrength = 3; 
+			this.attackingStrength = 2;
+			break;
+		case GameConstants.LEGION:
+			this.defensiveStrength = 2; 
+			this.attackingStrength = 4; 
+			break;
+		case GameConstants.SETTLER:
+			this.defensiveStrength = 3; 
+			this.attackingStrength = 0;
+			break; 		
+		}
 	}
 	
-	public UnitImpl(String unitType, Player owner, int moveCount, int defensiveStrength, int attackingStrength) {
-		this.unitType = unitType; 
-		this.owner = owner; 
-		this.moveCount = moveCount; 
-		this.defensiveStrength = defensiveStrength; 
-		this.attackingStrength = attackingStrength; 
-	}
 	
 	@Override
 	public String getTypeString() {
@@ -48,6 +56,18 @@ public class UnitImpl implements Unit {
 	@Override
 	public int getAttackingStrength() {
 		return attackingStrength;
+	}
+	
+	public void beenMoved() {
+		hasBeenMoved = true; 
+	}
+	
+	public void resetMove() {
+		hasBeenMoved = false;
+	}
+
+	public boolean hasItBeenMoved() {
+		return hasBeenMoved;
 	}
 
 }

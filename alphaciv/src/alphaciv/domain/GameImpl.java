@@ -71,6 +71,7 @@ public class GameImpl implements Game {
 		return cities.get(p);
 	}
 
+
 	public Player getPlayerInTurn() {
 		return currentPlayer; 
 	}
@@ -83,20 +84,21 @@ public class GameImpl implements Game {
 			return null; 
 		}
 	}
-	
+
 	public int getAge() { return currentAge; }
 
 	public boolean moveUnit( Position from, Position to ) {		
-	    if (isValidMove(from, to)) {  	
-	    	units.put(to, units.get(from));
-	    	units.remove(from);
-	    	return true;
-	    }
-	    else {
-	    	return false; 
-	    }
+		if (isValidMove(from, to)) {  	
+			units.put(to, units.get(from));
+			units.remove(from);
+			((UnitImpl)units.get(to)).beenMoved();
+			return true;
+		}
+		else {
+			return false; 
+		}
 	}
-	
+
 	/**
 	 * returns true if the piece being moved is player's piece
 	 * 			and if the tile being moved to is not a mountain
@@ -106,27 +108,126 @@ public class GameImpl implements Game {
 	 * @param to
 	 */
 	private boolean isValidMove( Position from, Position to ) {
-		Unit movingUnit = units.get(from);
+		UnitImpl movingUnit = (UnitImpl)units.get(from);
 		Unit unitInToPos = units.get(to);
-		return movingUnit.getOwner() == currentPlayer 
+		return  !movingUnit.hasItBeenMoved()
+				&& movingUnit.getOwner() == currentPlayer 
 				&& getTileAt(to).getTypeString() != GameConstants.MOUNTAINS
-				&& (unitInToPos == null || unitInToPos.getOwner() != currentPlayer);	
+				&& (unitInToPos == null || unitInToPos.getOwner() != currentPlayer)
+				&& isValidMoveLength(from,to);	
 	}
 
+	private boolean isValidMoveLength(Position from, Position to ) {
+		int rowDist = from.getRow() - to.getRow();
+		int colDist = from.getColumn() - to.getColumn();
+		int moveCount = units.get(from).getMoveCount();
+		return (rowDist >= -moveCount && rowDist <= moveCount) && (colDist >= -moveCount && colDist <= moveCount);
+	}
+	
 	public void endOfTurn() {
 		if(getPlayerInTurn().equals(Player.RED)) { currentPlayer = Player.BLUE; }
 		else if (getPlayerInTurn().equals(Player.BLUE)) { 
-			
-			currentAge += 100;
 			currentPlayer = Player.RED; 
+			endOfRound();
 		}
 	}
-	
+
 	private void endOfRound() {
+		currentAge += 100;
+		for (Position p : cities.keySet()) {
+			((CityImpl) cities.get(p)).produceProduction();
+			produceNewUnits(p);
+		}
+		for (Position p : units.keySet()) {
+			((UnitImpl)units.get(p)).resetMove();
+		}
+	}
+
+	/**
+	 * costs: 
+	 * 	Archer  - 10
+	 * 	Legion  - 15
+	 * 	Settler - 30 
+	 */
+	private void produceNewUnits(Position p) {
+		CityImpl c = (CityImpl)cities.get(p);
+		if (c.getTotalProduction() >= convertUnitToCost(c.getProduction())) {
+			c.decreaseProductionForUnitCreation();
+			placeProducedUnit(p);
+		}
+		
+	}
+
+	private int convertUnitToCost (String production) {
+		int cost;
+		switch (production) {
+		case GameConstants.ARCHER:
+			cost = GameConstants.ARCHER_COST;
+			break;
+		case GameConstants.LEGION:
+			cost = GameConstants.LEGION_COST; 
+			break;
+		case GameConstants.SETTLER:
+			cost = GameConstants.SETTLER_COST;
+			break; 
+		default:
+			cost = 0;		
+		}
+		return cost;
+	}
+
+	private void placeProducedUnit(Position posOfCity) {
+		int row = posOfCity.getRow();
+		int col = posOfCity.getColumn();
+		CityImpl c = (CityImpl)cities.get(posOfCity);
+		Unit u = new UnitImpl(c.getProduction(),c.getOwner());
+
+		if(units.get(new Position(row,col)) == null) {
+			units.put(new Position(row, col), u); 
+		}
+		else if (units.get(new Position(row-1,col)) == null) {
+			units.put(new Position(row-1,col), u); 
+		}
+		else if (units.get(new Position(row-1,col+1)) == null) {
+			units.put(new Position(row-1,col+1), u);
+		}
+		else if (units.get(new Position(row,col+1)) == null) {
+			units.put(new Position(row,col+1), u);
+		}
+		else if (units.get(new Position(row+1,col+1)) == null) {
+			units.put(new Position(row+1,col+1), u);
+		}
+		else if (units.get(new Position(row+1,col)) == null) {
+			units.put(new Position(row+1,col), u);
+		}
+		else if (units.get(new Position(row+1,col-1)) == null) {
+			units.put(new Position(row+1,col-1), u);
+		}
+		else if (units.get(new Position(row,col-1)) == null) {
+			units.put(new Position(row, col-1), u);			
+		}
+		else if (units.get(new Position(row-1,col-1)) == null) {
+			units.put(new Position(row-1, col-1), u);
+		}
+		else {
+			c.refundProductionForUnitCreation();
+		}
+	}
+
+	public void changeWorkForceFocusInCityAt( Position p, String balance ) {
+		//does nothing for right now
+	}
+	
+	public void changeProductionInCityAt( Position p, String unitType ) {
+		CityImpl c = (CityImpl)cities.get(p);
+		if (currentPlayer.equals(c.getOwner())) {
+			c.setProduction(unitType);
+		}	
+	}
+	
+	public void performUnitActionAt( Position p ) {
+		//does nothing for right now
 		
 	}
 	
-	public void changeWorkForceFocusInCityAt( Position p, String balance ) {}
-	public void changeProductionInCityAt( Position p, String unitType ) {}
-	public void performUnitActionAt( Position p ) {}
 }

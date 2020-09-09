@@ -14,6 +14,7 @@ public class CityImpl implements City {
 		this.population = 1; 
 		this.productionPerRound = 6;
 		this.totalProduction = 0;
+		this.production = GameConstants.ARCHER;
 		this.workforceFocus = GameConstants.productionFocus;
 	}
 	
@@ -37,12 +38,54 @@ public class CityImpl implements City {
 		return workforceFocus;
 	}
 	
+	
 	public int getTotalProduction() {
 		return totalProduction; 
 	}
 	
-	public void produce() {
+	public void produceProduction() {
 		totalProduction += productionPerRound;
 	}
+	
+	public void decreaseProductionForUnitCreation() {
+		int cost;
+		switch (production) {
+		case GameConstants.ARCHER:
+			cost = GameConstants.ARCHER_COST;
+			break;
+		case GameConstants.LEGION:
+			cost = GameConstants.LEGION_COST; 
+			break;
+		case GameConstants.SETTLER:
+			cost = GameConstants.SETTLER_COST;
+			break; 
+		default:
+			cost = 0;		
+		}
+		
+		totalProduction -= cost; 
+	}
 
+	public void refundProductionForUnitCreation() {
+		int cost;
+		switch (production) {
+		case GameConstants.ARCHER:
+			cost = GameConstants.ARCHER_COST;
+			break;
+		case GameConstants.LEGION:
+			cost = GameConstants.LEGION_COST; 
+			break;
+		case GameConstants.SETTLER:
+			cost = GameConstants.SETTLER_COST;
+			break; 
+		default:
+			cost = 0;		
+		}
+		totalProduction += cost; 
+		
+	}
+	
+	public void setProduction(String unitType) {
+		this.production = unitType; 
+	}	
 }
