@@ -112,7 +112,7 @@ public class GameImpl implements Game {
 		Unit unitInToPos = units.get(to);
 		return  !movingUnit.hasItBeenMoved()
 				&& movingUnit.getOwner() == currentPlayer 
-				&& getTileAt(to).getTypeString() != GameConstants.MOUNTAINS
+				&& !GameConstants.MOUNTAINS.equals(getTileAt(to).getTypeString())
 				&& (unitInToPos == null || unitInToPos.getOwner() != currentPlayer)
 				&& isValidMoveLength(from,to);	
 	}
@@ -182,36 +182,40 @@ public class GameImpl implements Game {
 		CityImpl c = (CityImpl)cities.get(posOfCity);
 		Unit u = new UnitImpl(c.getProduction(),c.getOwner());
 
-		if(units.get(new Position(row,col)) == null) {
+		if(isLegalPlacementOfCreatedUnit(new Position(row,col))) {
 			units.put(new Position(row, col), u); 
 		}
-		else if (units.get(new Position(row-1,col)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row-1,col))) {
 			units.put(new Position(row-1,col), u); 
 		}
-		else if (units.get(new Position(row-1,col+1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row-1,col+1))) {
 			units.put(new Position(row-1,col+1), u);
 		}
-		else if (units.get(new Position(row,col+1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row,col+1))) {
 			units.put(new Position(row,col+1), u);
 		}
-		else if (units.get(new Position(row+1,col+1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row+1,col+1))) {
 			units.put(new Position(row+1,col+1), u);
 		}
-		else if (units.get(new Position(row+1,col)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row+1,col))) {
 			units.put(new Position(row+1,col), u);
 		}
-		else if (units.get(new Position(row+1,col-1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row+1,col-1))) {
 			units.put(new Position(row+1,col-1), u);
 		}
-		else if (units.get(new Position(row,col-1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row,col-1))) {
 			units.put(new Position(row, col-1), u);			
 		}
-		else if (units.get(new Position(row-1,col-1)) == null) {
+		else if (isLegalPlacementOfCreatedUnit(new Position(row-1,col-1))) {
 			units.put(new Position(row-1, col-1), u);
 		}
 		else {
 			c.refundProductionForUnitCreation();
 		}
+	}
+	
+	public boolean isLegalPlacementOfCreatedUnit(Position p) {
+		return units.get(p) == null && !GameConstants.MOUNTAINS.equals(getTileAt(p).getTypeString());
 	}
 
 	public void changeWorkForceFocusInCityAt( Position p, String balance ) {

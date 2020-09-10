@@ -287,20 +287,26 @@ public class TestAlphaCiv {
 		game.endOfTurn();   // 8
 		game.endOfTurn();
 		game.endOfTurn();   // 14 - 10 = 4
+		
+		// skips (2,2) because there is a mountain
 		u = game.getUnitAt(new Position(2,2));
-		assertEquals("Should be Archer at (2,2)",GameConstants.ARCHER, u.getTypeString()); 
+		assertNull("Should not be any unit at (2,2)",u); 
+		
+		u = game.getUnitAt(new Position(2,1));
+		assertEquals("Should be Archer at (2,1)",GameConstants.ARCHER, u.getTypeString()); 
+		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
+		assertEquals("Should be 4 Production", 4, ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
+		
+		// skips (2,0) because unit already exists.
+		u = game.getUnitAt(new Position(2,0));
+		assertEquals("Should be Archer already at (2,0)",GameConstants.ARCHER, u.getTypeString()); 
 		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
 		
 		game.endOfTurn();
 		game.endOfTurn();   // 10 - 10 = 0
-		u = game.getUnitAt(new Position(2,1));
-		assertEquals("Should be Archer at (2,1)",GameConstants.ARCHER, u.getTypeString()); 
-		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
-		assertEquals("Should be 0 Production", 0 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 		
-		// skips (2,0) because unit already exists.
-		u = game.getUnitAt(new Position(2,0));
-		assertEquals("Should be Archer at (2,0)",GameConstants.ARCHER, u.getTypeString()); 
+		u = game.getUnitAt(new Position(1,0));
+		assertEquals("Should be Archer at (1,0)",GameConstants.ARCHER, u.getTypeString()); 
 		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
 		
 		
@@ -309,25 +315,19 @@ public class TestAlphaCiv {
 		assertEquals("Should be 6 Production", 6 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 		game.endOfTurn();
 		game.endOfTurn();   // 12 - 10 = 2
-		u = game.getUnitAt(new Position(1,0));
-		assertEquals("Should be Archer at (1,0)",GameConstants.ARCHER, u.getTypeString()); 
+		
+		u = game.getUnitAt(new Position(0,0));	
+		assertEquals("Should be Archer at (0,0)",GameConstants.ARCHER, u.getTypeString()); 
 		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
 		
 		game.endOfTurn();
 		game.endOfTurn();   // 8
 		game.endOfTurn();
-		game.endOfTurn();   // 14 - 10 = 4
-		u = game.getUnitAt(new Position(0,0));	
-		assertEquals("Should be Archer at (0,0)",GameConstants.ARCHER, u.getTypeString()); 
-		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
-		
-		
+		game.endOfTurn();   // 14 
+		assertEquals("Should refund Production since there's no room for unit", 14 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 		game.endOfTurn();
-		game.endOfTurn();   // 10  since unit cannot be placed
-		assertEquals("Should refund Production since there's no room for unit", 10 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
-		game.endOfTurn();
-		game.endOfTurn();   // 16  since unit cannot be placed
-		assertEquals("Should refund Production since there's no room for unit", 16 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
+		game.endOfTurn();   // 20  since unit cannot be placed
+		assertEquals("Should refund Production since there's no room for unit", 20 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 	}
 	
 	@Test
