@@ -21,8 +21,9 @@ import java.util.HashMap;
 
 public class GameImpl implements Game {
 	private Tile[][] world;
-	private HashMap<Position, Unit> units; 
+	//private HashMap<Position, Unit> units; 
 	//private HashMap<Position, City> cities;
+	private HashMap<Position, UnitImpl> units;
 	private HashMap<Position, CityImpl> cities; 
 	private Player currentPlayer;
 	private int currentAge;
@@ -45,7 +46,8 @@ public class GameImpl implements Game {
 
 		//initialize and set up units
 		//red archer at (2,0), blue legion at (3,2), and red settler at (4,3)
-		units = new HashMap<Position, Unit>();
+		//units = new HashMap<Position, Unit>();
+		units = new HashMap<Position, UnitImpl>();
 		units.put(new Position(2, 0), new UnitImpl(GameConstants.ARCHER, Player.RED)); 
 		units.put(new Position (3, 2), new UnitImpl(GameConstants.LEGION, Player.BLUE));
 		units.put(new Position(4, 3), new UnitImpl(GameConstants.SETTLER, Player.RED));
@@ -94,7 +96,7 @@ public class GameImpl implements Game {
 		if (isValidMove(from, to)) {  	
 			units.put(to, units.get(from));
 			units.remove(from);
-			((UnitImpl)units.get(to)).beenMoved();
+			units.get(to).beenMoved();
 			return true;
 		}
 		else {
@@ -111,7 +113,7 @@ public class GameImpl implements Game {
 	 * @param to
 	 */
 	private boolean isValidMove( Position from, Position to ) {
-		UnitImpl movingUnit = (UnitImpl)units.get(from);
+		UnitImpl movingUnit = units.get(from);
 		Unit unitInToPos = units.get(to);
 		return  !movingUnit.hasItBeenMoved()
 				&& movingUnit.getOwner() == currentPlayer 
@@ -138,12 +140,11 @@ public class GameImpl implements Game {
 	private void endOfRound() {
 		currentAge += 100;
 		for (Position p : cities.keySet()) {
-			//((CityImpl) cities.get(p)).produceProduction();
-			(cities.get(p)).produceProduction();
+			cities.get(p).produceProduction();
 			produceNewUnits(p);
 		}
 		for (Position p : units.keySet()) {
-			((UnitImpl)units.get(p)).resetMove();
+			units.get(p).resetMove();
 		}
 	}
 
@@ -154,7 +155,6 @@ public class GameImpl implements Game {
 	 * 	Settler - 30 
 	 */
 	private void produceNewUnits(Position p) {
-		//CityImpl c = (CityImpl)cities.get(p);
 		CityImpl c = cities.get(p);
 		if (c.getTotalProduction() >= convertUnitToCost(c.getProduction())) {
 			c.decreaseProductionForUnitCreation();
@@ -184,9 +184,8 @@ public class GameImpl implements Game {
 	private void placeProducedUnit(Position posOfCity) {
 		int row = posOfCity.getRow();
 		int col = posOfCity.getColumn();
-		//CityImpl c = (CityImpl)cities.get(posOfCity);
 		CityImpl c = cities.get(posOfCity);
-		Unit u = new UnitImpl(c.getProduction(),c.getOwner());
+		UnitImpl u = new UnitImpl(c.getProduction(),c.getOwner());
 
 		if(isLegalPlacementOfCreatedUnit(new Position(row,col))) {
 			units.put(new Position(row, col), u); 
@@ -229,7 +228,6 @@ public class GameImpl implements Game {
 	}
 	
 	public void changeProductionInCityAt( Position p, String unitType ) {
-		//CityImpl c = (CityImpl)cities.get(p);
 		CityImpl c = cities.get(p);
 		if (currentPlayer.equals(c.getOwner())) {
 			c.setProduction(unitType);
