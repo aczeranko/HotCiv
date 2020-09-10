@@ -22,7 +22,8 @@ import java.util.HashMap;
 public class GameImpl implements Game {
 	private Tile[][] world;
 	private HashMap<Position, Unit> units; 
-	private HashMap<Position, City> cities;
+	//private HashMap<Position, City> cities;
+	private HashMap<Position, CityImpl> cities; 
 	private Player currentPlayer;
 	private int currentAge;
 
@@ -51,7 +52,9 @@ public class GameImpl implements Game {
 
 		//initialize and set up cities 
 		//Red city at (1, 1); 
-		cities = new HashMap<Position, City>();
+		//cities = new HashMap<Position, City>();
+		cities = new HashMap<Position, CityImpl>(); 
+		
 		cities.put(new Position(1,1), new CityImpl(Player.RED));
 		cities.put(new Position(4, 1), new CityImpl(Player.BLUE));
 
@@ -135,7 +138,8 @@ public class GameImpl implements Game {
 	private void endOfRound() {
 		currentAge += 100;
 		for (Position p : cities.keySet()) {
-			((CityImpl) cities.get(p)).produceProduction();
+			//((CityImpl) cities.get(p)).produceProduction();
+			(cities.get(p)).produceProduction();
 			produceNewUnits(p);
 		}
 		for (Position p : units.keySet()) {
@@ -150,7 +154,8 @@ public class GameImpl implements Game {
 	 * 	Settler - 30 
 	 */
 	private void produceNewUnits(Position p) {
-		CityImpl c = (CityImpl)cities.get(p);
+		//CityImpl c = (CityImpl)cities.get(p);
+		CityImpl c = cities.get(p);
 		if (c.getTotalProduction() >= convertUnitToCost(c.getProduction())) {
 			c.decreaseProductionForUnitCreation();
 			placeProducedUnit(p);
@@ -179,7 +184,8 @@ public class GameImpl implements Game {
 	private void placeProducedUnit(Position posOfCity) {
 		int row = posOfCity.getRow();
 		int col = posOfCity.getColumn();
-		CityImpl c = (CityImpl)cities.get(posOfCity);
+		//CityImpl c = (CityImpl)cities.get(posOfCity);
+		CityImpl c = cities.get(posOfCity);
 		Unit u = new UnitImpl(c.getProduction(),c.getOwner());
 
 		if(isLegalPlacementOfCreatedUnit(new Position(row,col))) {
@@ -223,7 +229,8 @@ public class GameImpl implements Game {
 	}
 	
 	public void changeProductionInCityAt( Position p, String unitType ) {
-		CityImpl c = (CityImpl)cities.get(p);
+		//CityImpl c = (CityImpl)cities.get(p);
+		CityImpl c = cities.get(p);
 		if (currentPlayer.equals(c.getOwner())) {
 			c.setProduction(unitType);
 		}	
