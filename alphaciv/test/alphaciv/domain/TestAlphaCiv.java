@@ -24,7 +24,9 @@ public class TestAlphaCiv {
 	/** Fixture for alphaciv testing. */
 	@Before
 	public void setUp() {
-		game = new GameImpl();
+		WinnerStrategy winningStrat = new RedWinsAt3000BCStrategy();
+		WorldAgingStrategy worldAgingStrat = new IncreaseAgeBy100YearsStrategy();
+		game = new GameImpl(winningStrat, worldAgingStrat);
 	}
 
 	@Test
@@ -55,6 +57,11 @@ public class TestAlphaCiv {
 		game.endOfTurn(); // sets it to Blue's turn
 		assertEquals("Should be Blue's Turn",Player.BLUE, game.getPlayerInTurn());
 		assertFalse("Units cannot move over mountains", game.moveUnit(new Position (3,2), new Position(2,2)));
+	}
+	
+	@Test 
+	public void unitsCannotMoveOverOcean() {
+		assertFalse("Units cannot move over oceans", game.moveUnit(new Position (2,0), new Position(1,0)));
 	}
 
 	@Test
@@ -305,8 +312,12 @@ public class TestAlphaCiv {
 		game.endOfTurn();
 		game.endOfTurn();   // 10 - 10 = 0
 		
+		// skips (1,0) because there is an ocean
 		u = game.getUnitAt(new Position(1,0));
-		assertEquals("Should be Archer at (1,0)",GameConstants.ARCHER, u.getTypeString()); 
+		assertNull("Should not be any unit at (1,0)",u); 
+		
+		u = game.getUnitAt(new Position(0,0));	
+		assertEquals("Should be Archer at (0,0)",GameConstants.ARCHER, u.getTypeString()); 
 		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
 		
 		
@@ -314,20 +325,13 @@ public class TestAlphaCiv {
 		game.endOfTurn();   // 6
 		assertEquals("Should be 6 Production", 6 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 		game.endOfTurn();
-		game.endOfTurn();   // 12 - 10 = 2
+		game.endOfTurn();   // 12 
 		
-		u = game.getUnitAt(new Position(0,0));	
-		assertEquals("Should be Archer at (0,0)",GameConstants.ARCHER, u.getTypeString()); 
-		assertEquals("Should be Red Archer", Player.RED, u.getOwner()); 
+		assertEquals("Should refund Production since there's no room for unit", 12 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 		
 		game.endOfTurn();
-		game.endOfTurn();   // 8
-		game.endOfTurn();
-		game.endOfTurn();   // 14 
-		assertEquals("Should refund Production since there's no room for unit", 14 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
-		game.endOfTurn();
-		game.endOfTurn();   // 20  since unit cannot be placed
-		assertEquals("Should refund Production since there's no room for unit", 20 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
+		game.endOfTurn();   // 18
+		assertEquals("Should refund Production since there's no room for unit", 18 , ((CityImpl)game.getCityAt(new Position(1,1))).getTotalProduction());
 	}
 	
 	@Test
@@ -350,5 +354,35 @@ public class TestAlphaCiv {
 		game.endOfTurn();
 		assertFalse(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMoved());
 	}
-
+	
+	@Test 
+	public void CapturingCityWithoutDefendingUnit() {
+		// red's turn
+		game.endOfTurn(); 
+		// blue's turn		
+		game.moveUnit(new Position(3,2), (new Position(2,1)));
+		game.endOfTurn();
+		// red's turn
+		game.endOfTurn();
+		// blue's turn
+		City c = game.getCityAt(new Position (1,1 ));
+		assertEquals("City should still be owned by Red", Player.RED, c.getOwner());
+		game.moveUnit(new Position(2,1), (new Position(1,1)));
+		assertEquals("Blue Captures City at (1,1)", Player.BLUE, c.getOwner());
+	}
+	
+	@Test
+	public void CapturingCityWithDefendingUnit() {
+		// red's turn
+		game.moveUnit(new Position(4,3), new Position(4,2));
+		game.endOfTurn();
+		// blue's turn
+		game.moveUnit(new Position(3,2), new Position(4,1));
+		game.endOfTurn();
+		// red's turn
+		City c = game.getCityAt(new Position (4,1));
+		assertEquals("City should still be owned by Blue", Player.BLUE, c.getOwner());
+		game.moveUnit(new Position(4,2), new Position(4,1));
+		assertEquals("Red Captures Blue City at (4,1)", Player.RED, c.getOwner());
+	}	
 }

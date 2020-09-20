@@ -21,15 +21,15 @@ import java.util.HashMap;
 
 public class GameImpl implements Game {
 	private Tile[][] world;
-	//private HashMap<Position, Unit> units; 
-	//private HashMap<Position, City> cities;
 	private HashMap<Position, UnitImpl> units;
 	private HashMap<Position, CityImpl> cities; 
 	private Player currentPlayer;
 	private int currentAge;
+	
+	private WinnerStrategy winCond; 
+	private WorldAgingStrategy agingStrategy;
 
-
-	public GameImpl() {
+	public GameImpl(WinnerStrategy winningCondition, WorldAgingStrategy agingStrategy) {
 
 		//setting up 16x16 tiles 
 		//ocean at (1,0) and mountains at (2,2)
@@ -46,7 +46,6 @@ public class GameImpl implements Game {
 
 		//initialize and set up units
 		//red archer at (2,0), blue legion at (3,2), and red settler at (4,3)
-		//units = new HashMap<Position, Unit>();
 		units = new HashMap<Position, UnitImpl>();
 		units.put(new Position(2, 0), new UnitImpl(GameConstants.ARCHER, Player.RED)); 
 		units.put(new Position (3, 2), new UnitImpl(GameConstants.LEGION, Player.BLUE));
@@ -54,7 +53,6 @@ public class GameImpl implements Game {
 
 		//initialize and set up cities 
 		//Red city at (1, 1); 
-		//cities = new HashMap<Position, City>();
 		cities = new HashMap<Position, CityImpl>(); 
 		
 		cities.put(new Position(1,1), new CityImpl(Player.RED));
@@ -62,6 +60,9 @@ public class GameImpl implements Game {
 
 		currentPlayer = Player.RED;
 		currentAge = -4000;
+		
+		winCond = winningCondition; 
+		this.agingStrategy = agingStrategy;
 	}
 
 	public Tile getTileAt( Position p ) { 
@@ -82,21 +83,21 @@ public class GameImpl implements Game {
 	}
 
 	public Player getWinner() { 
-		if(currentAge >= -3000) {
-			return Player.RED;
-		}
-		else {
-			return null; 
-		}
+		return winCond.getWinner(currentAge, cities);
 	}
 
 	public int getAge() { return currentAge; }
 
 	public boolean moveUnit( Position from, Position to ) {		
 		if (isValidMove(from, to)) {  	
-			units.put(to, units.get(from));
+			UnitImpl movingUnit = units.get(from);
+			units.put(to, movingUnit);
 			units.remove(from);
 			units.get(to).beenMoved();
+			CityImpl c = cities.get(to);
+			if (c != null) {
+				c.setOwner(movingUnit.getOwner());
+			}	
 			return true;
 		}
 		else {
@@ -117,7 +118,7 @@ public class GameImpl implements Game {
 		Unit unitInToPos = units.get(to);
 		return  !movingUnit.hasItBeenMoved()
 				&& movingUnit.getOwner() == currentPlayer 
-				&& !GameConstants.MOUNTAINS.equals(getTileAt(to).getTypeString())
+				&& isTileMoveableOnto(to)
 				&& (unitInToPos == null || unitInToPos.getOwner() != currentPlayer)
 				&& isValidMoveLength(from,to);	
 	}
@@ -138,7 +139,7 @@ public class GameImpl implements Game {
 	}
 
 	private void endOfRound() {
-		currentAge += 100;
+		currentAge = agingStrategy.Aging(currentAge);
 		for (Position p : cities.keySet()) {
 			cities.get(p).produceProduction();
 			produceNewUnits(p);
@@ -219,8 +220,13 @@ public class GameImpl implements Game {
 		}
 	}
 	
+	private boolean isTileMoveableOnto(Position p) {
+		return (!GameConstants.MOUNTAINS.equals(getTileAt(p).getTypeString())
+				&& !GameConstants.OCEANS.equals(getTileAt(p).getTypeString()));
+	}
+	
 	public boolean isLegalPlacementOfCreatedUnit(Position p) {
-		return units.get(p) == null && !GameConstants.MOUNTAINS.equals(getTileAt(p).getTypeString());
+		return units.get(p) == null && isTileMoveableOnto(p);
 	}
 
 	public void changeWorkForceFocusInCityAt( Position p, String balance ) {
@@ -235,8 +241,7 @@ public class GameImpl implements Game {
 	}
 	
 	public void performUnitActionAt( Position p ) {
-		//does nothing for right now
-		
+		//does nothing for right now	
 	}
 	
 }

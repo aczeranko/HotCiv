@@ -88,4 +88,8 @@ public class CityImpl implements City {
 	public void setProduction(String unitType) {
 		this.production = unitType; 
 	}	
+	
+	public void setOwner(Player owner) {
+		this.owner = owner; 
+	}
 }
