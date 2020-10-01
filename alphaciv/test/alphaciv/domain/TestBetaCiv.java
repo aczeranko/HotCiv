@@ -13,7 +13,10 @@ public class TestBetaCiv {
 	public void setUp() {
 		WinnerStrategy winningStrat = new PlayerWinsIfConquersAllCitiesInWorldStrategy(); 
 		WorldAgingStrategy worldAgingStrat = new TimePeriodDependentAgingStrategy();
-		game = new GameImpl(winningStrat, worldAgingStrat);
+		AllUnitsActionStrategy allUnitsAction = new AllUnitsActionStrategyImpl(new DoNothingActionStrategy(),
+				   new DoNothingActionStrategy(),
+				   new DoNothingActionStrategy());
+		game = new GameImpl(winningStrat, worldAgingStrat, allUnitsAction);
 	}
 	
 	@Test 

@@ -1,20 +1,29 @@
 package alphaciv.domain;
 
 public class UnitImpl implements Unit {
-	
+
 	private String unitType; 
 	private Player owner; 
 	private int moveCount; 
 	private boolean hasBeenMoved;
 	private int defensiveStrength; 
 	private int attackingStrength; 
-	
-	public UnitImpl(String unitType, Player owner) {
+	private boolean isFortified;
+	private boolean actionPerformedYet;
+
+
+	private UnitActionStrategy currentActionStrategy;
+
+
+	public UnitImpl(String unitType, Player owner, AllUnitsActionStrategy allUnitsStrategy) {
 		this.unitType = unitType; 
 		this.owner = owner; 
 		this.moveCount = 1; 
 		this.hasBeenMoved = false; 
-		
+		this.currentActionStrategy = allUnitsStrategy.getStrategyFor(unitType);
+		isFortified = false; 
+		actionPerformedYet = false; 
+
 		switch (unitType) {
 		case GameConstants.ARCHER:
 			this.defensiveStrength = 3; 
@@ -30,8 +39,8 @@ public class UnitImpl implements Unit {
 			break; 		
 		}
 	}
-	
-	
+
+
 	@Override
 	public String getTypeString() {
 		return unitType; 
@@ -57,17 +66,49 @@ public class UnitImpl implements Unit {
 	public int getAttackingStrength() {
 		return attackingStrength;
 	}
-	
+
 	public void beenMoved() {
 		hasBeenMoved = true; 
 	}
-	
-	public void resetMove() {
+
+	public void resetUnitMoveAndAction() {
 		hasBeenMoved = false;
+		actionPerformedYet = false;
 	}
 
-	public boolean hasItBeenMoved() {
-		return hasBeenMoved;
+	public boolean hasItBeenMovedOrIsFortified() {
+		return hasBeenMoved || isFortified;
 	}
+	
+	public boolean hasActionBeenPerformed() {
+		return actionPerformedYet;
+	}
+
+	
+	public void fortify() {
+		if (unitType.equals(GameConstants.ARCHER)) {
+			if (isFortified) {
+				// defortify
+				isFortified = false; 
+				defensiveStrength = defensiveStrength /2; 
+			}
+			else {
+				isFortified = true; 
+				defensiveStrength = defensiveStrength * 2; 
+			}
+		}
+
+	}
+
+	public void doAction(Position posOfUnit, UnitActionContext actionContext) {
+		currentActionStrategy.performAction(posOfUnit, actionContext);
+		actionPerformedYet = true; 
+	}
+
+	public boolean IsFortified() {
+		return isFortified;
+	}
+
+
 
 }

@@ -26,7 +26,10 @@ public class TestAlphaCiv {
 	public void setUp() {
 		WinnerStrategy winningStrat = new RedWinsAt3000BCStrategy();
 		WorldAgingStrategy worldAgingStrat = new IncreaseAgeBy100YearsStrategy();
-		game = new GameImpl(winningStrat, worldAgingStrat);
+		AllUnitsActionStrategy allUnitsAction = new AllUnitsActionStrategyImpl(new DoNothingActionStrategy(),
+																			   new DoNothingActionStrategy(),
+																			   new DoNothingActionStrategy());
+		game = new GameImpl(winningStrat, worldAgingStrat, allUnitsAction);
 	}
 
 	@Test
@@ -336,23 +339,23 @@ public class TestAlphaCiv {
 	
 	@Test
 	public void hasNotBeenMoved() {
-		assertFalse(((UnitImpl)game.getUnitAt(new Position(4,3))).hasItBeenMoved());
+		assertFalse(((UnitImpl)game.getUnitAt(new Position(4,3))).hasItBeenMovedOrIsFortified());
 	}
 	
 	@Test
 	public void hasBeenMoved() {
 		game.moveUnit(new Position(4,3), new Position (5,3));
-		assertTrue(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMoved());
+		assertTrue(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMovedOrIsFortified());
 	}
 	
 	@Test
 	public void ResetMovementAfterRoundEnds() {
 		game.moveUnit(new Position(4,3), new Position (5,3));
-		assertTrue(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMoved());
+		assertTrue(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMovedOrIsFortified());
 		
 		game.endOfTurn();
 		game.endOfTurn();
-		assertFalse(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMoved());
+		assertFalse(((UnitImpl)game.getUnitAt(new Position(5,3))).hasItBeenMovedOrIsFortified());
 	}
 	
 	@Test 
