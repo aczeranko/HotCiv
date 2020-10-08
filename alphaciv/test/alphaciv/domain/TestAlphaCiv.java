@@ -29,7 +29,21 @@ public class TestAlphaCiv {
 		AllUnitsActionStrategy allUnitsAction = new AllUnitsActionStrategyImpl(new DoNothingActionStrategy(),
 																			   new DoNothingActionStrategy(),
 																			   new DoNothingActionStrategy());
-		game = new GameImpl(winningStrat, worldAgingStrat, allUnitsAction);
+		WorldGeneratorImpl worldGen = new WorldGeneratorImpl(allUnitsAction);
+		//setting up 16x16 tiles 
+		//ocean at (1,0) and mountains at (2,2)
+		worldGen.createOceans(new Position(1, 0));
+		worldGen.createMountains(new Position(2, 2));
+		//red archer at (2,0), blue legion at (3,2), and red settler at (4,3)
+		worldGen.createUnit(new Position(2,0), GameConstants.ARCHER, Player.RED);
+		worldGen.createUnit(new Position(3,2), GameConstants.LEGION, Player.BLUE);
+		worldGen.createUnit(new Position(4, 3), GameConstants.SETTLER, Player.RED);
+		
+		//Red city at (1, 1), Blue city at (4,1);
+		worldGen.createCityAt(new Position(1,1), Player.RED);
+		worldGen.createCityAt(new Position(4, 1), Player.BLUE);
+		
+		game = new GameImpl(winningStrat, worldAgingStrat, worldGen);
 	}
 
 	@Test

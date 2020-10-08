@@ -23,6 +23,7 @@ public class GameImpl implements Game, UnitActionContext {
 	private Tile[][] world;
 	private HashMap<Position, UnitImpl> units;
 	private HashMap<Position, CityImpl> cities; 
+	//private WorldFactory worldFactory;
 	private Player currentPlayer;
 	private int currentAge;
 
@@ -30,36 +31,17 @@ public class GameImpl implements Game, UnitActionContext {
 	private WorldAgingStrategy agingStrategy;
 	private AllUnitsActionStrategy allUnitsAction;
 
-	public GameImpl(WinnerStrategy winningCondition, WorldAgingStrategy agingStrategy, AllUnitsActionStrategy allUnitsAction) {
+	public GameImpl(WinnerStrategy winningCondition, WorldAgingStrategy agingStrategy, WorldFactory worldFactory) {
 
-		//setting up 16x16 tiles 
-		//ocean at (1,0) and mountains at (2,2)
-		world = new Tile[GameConstants.WORLDSIZE][GameConstants.WORLDSIZE];
+		//this.worldFactory = worldFactory;
 
-		for (int i = 0; i < GameConstants.WORLDSIZE; i++) {
-			for(int j = 0; j < GameConstants.WORLDSIZE; j++) {
-				world[i][j] = new TileImpl(new Position(i,j));
-			}
-		}
-
-		world[1][0] = new TileImpl(new Position(1, 0), GameConstants.OCEANS);
-		world[2][2] = new TileImpl(new Position(2, 2), GameConstants.MOUNTAINS);	
-
-		this.allUnitsAction = allUnitsAction;
-
+		world = worldFactory.getWorld();	
+		allUnitsAction = worldFactory.getAllUnitsActionStrategy();
 		//initialize and set up units
-		//red archer at (2,0), blue legion at (3,2), and red settler at (4,3)
-		units = new HashMap<Position, UnitImpl>();
-		units.put(new Position(2, 0), new UnitImpl(GameConstants.ARCHER, Player.RED, allUnitsAction)); 
-		units.put(new Position (3, 2), new UnitImpl(GameConstants.LEGION, Player.BLUE, allUnitsAction));
-		units.put(new Position(4, 3), new UnitImpl(GameConstants.SETTLER, Player.RED, allUnitsAction));
-
+		units = worldFactory.getUnits();
 		//initialize and set up cities 
-		//Red city at (1, 1); 
-		cities = new HashMap<Position, CityImpl>(); 
+		cities = worldFactory.getCities(); 
 
-		cities.put(new Position(1,1), new CityImpl(Player.RED));
-		cities.put(new Position(4, 1), new CityImpl(Player.BLUE));
 
 		currentPlayer = Player.RED;
 		currentAge = -4000;
